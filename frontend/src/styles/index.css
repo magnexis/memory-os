@@ -1,0 +1,335 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  background: #03060b;
+  color: #e6f7ff;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  --memory-ambient: .7;
+  --memory-animation: .74;
+  --memory-glow: .58;
+  --memory-glow-px: 30px;
+  --memory-glow-inset-px: 9px;
+  --memory-bg-cyan-alpha: .119;
+  --memory-bg-gold-alpha: .071;
+  --memory-grid-alpha: .081;
+  --memory-grid-opacity: .754;
+  --memory-grid-size: 48px;
+  --memory-line-alpha: .033;
+  --memory-scan-opacity: .276;
+  --memory-field-opacity: .748;
+  --memory-shadow-alpha: .266;
+  --memory-shadow-inset-alpha: .078;
+  --memory-radar-duration: 5.9s;
+  --memory-radar-opacity: .576;
+  --memory-radar-shadow-alpha: .286;
+  --memory-edge-duration: 2.25s;
+  --memory-flow-border-alpha: .219;
+  --memory-flow-shadow-alpha: .121;
+  --memory-transition-duration: 223ms;
+  --memory-header-h: 5.5rem;
+  --memory-nav-row: 3rem;
+  --memory-sidebar-w: 22rem;
+  --memory-sidebar-collapsed-w: 5.5rem;
+  --memory-page-max-w: 108rem;
+  --memory-panel-pad: 1.5rem;
+  --memory-page-pad: 1.5rem;
+  --memory-page-pad-lg: 2.5rem;
+  --memory-node-w: 18rem;
+  --memory-node-pad: 1.25rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(73, 184, 255, .14), transparent 28rem),
+    radial-gradient(circle at 85% 70%, rgba(255, 200, 106, .08), transparent 26rem),
+    #03060b;
+}
+
+* {
+  scrollbar-color: rgb(98 240 255 / .28) rgb(7 17 31 / .7);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(7 17 31 / .75);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(98 240 255 / .24);
+  border: 2px solid rgb(7 17 31);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(98 240 255 / .42);
+}
+
+.memory-shell {
+  background:
+    radial-gradient(circle at 18% 18%, rgb(73 184 255 / var(--memory-bg-cyan-alpha)), transparent 30rem),
+    radial-gradient(circle at 86% 72%, rgb(255 200 106 / var(--memory-bg-gold-alpha)), transparent 26rem),
+    #03060b;
+}
+
+.memory-shell * {
+  transition-duration: var(--memory-transition-duration);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.tactical-grid {
+  background-image:
+    linear-gradient(rgb(73 184 255 / var(--memory-grid-alpha)) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(73 184 255 / var(--memory-grid-alpha)) 1px, transparent 1px);
+  background-size: var(--memory-grid-size) var(--memory-grid-size);
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+  opacity: var(--memory-grid-opacity);
+}
+
+.scanline {
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(98 240 255 / var(--memory-line-alpha)),
+    rgb(98 240 255 / var(--memory-line-alpha)) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  mix-blend-mode: screen;
+  opacity: var(--memory-scan-opacity);
+}
+
+.ambient-field {
+  opacity: var(--memory-field-opacity);
+  --route-accent: 98 240 255;
+  --route-secondary: 255 200 106;
+  transform: translate3d(calc(var(--cursor-x, 0) * -8px), calc(var(--cursor-y, 0) * -8px), 0);
+  transition: opacity 240ms ease, transform 700ms ease;
+}
+
+.ambient-timeline {
+  --route-accent: 255 200 106;
+  --route-secondary: 98 240 255;
+}
+
+.ambient-system {
+  --route-accent: 134 239 172;
+  --route-secondary: 98 240 255;
+}
+
+.ambient-sync {
+  --route-accent: 125 211 252;
+  --route-secondary: 251 113 133;
+}
+
+.nebula-layer {
+  mix-blend-mode: screen;
+  opacity: calc(.2 + var(--memory-ambient) * .18);
+  filter: blur(34px);
+  will-change: transform;
+}
+
+.nebula-a {
+  background:
+    radial-gradient(circle at calc(35% + var(--cursor-x, 0) * 5%) calc(22% + var(--cursor-y, 0) * 4%), rgb(var(--route-accent) / .22), transparent 28rem),
+    radial-gradient(circle at 82% 68%, rgb(var(--route-secondary) / .12), transparent 24rem);
+  animation: nebulaDrift 18s ease-in-out infinite alternate;
+}
+
+.nebula-b {
+  background:
+    radial-gradient(circle at 58% 42%, rgb(var(--route-secondary) / .09), transparent 20rem),
+    radial-gradient(circle at 18% 82%, rgb(var(--route-accent) / .12), transparent 22rem);
+  animation: nebulaDrift 24s ease-in-out infinite alternate-reverse;
+}
+
+.memory-fragments {
+  opacity: calc(.08 + var(--memory-ambient) * .18);
+  background-image:
+    linear-gradient(90deg, rgb(var(--route-accent) / .34) 0 1px, transparent 1px 100%),
+    linear-gradient(rgb(var(--route-accent) / .22) 0 1px, transparent 1px 100%);
+  background-size: 140px 46px, 180px 72px;
+  mask-image: radial-gradient(circle at center, black 0 35%, transparent 76%);
+  transform: translate3d(calc(var(--cursor-x, 0) * 12px), calc(var(--cursor-y, 0) * 8px), 0);
+  animation: fragmentDrift 28s linear infinite;
+}
+
+.gsap-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgb(98 240 255 / .16);
+  background:
+    linear-gradient(145deg, rgb(12 24 39 / .82), rgb(3 6 11 / .66)),
+    radial-gradient(circle at 12% 0%, rgb(98 240 255 / .08), transparent 24rem);
+  box-shadow:
+    0 20px 70px rgb(0 0 0 / .34),
+    0 0 var(--memory-glow-px) rgb(98 240 255 / calc(var(--memory-shadow-alpha) * .42)),
+    inset 0 1px 0 rgb(98 240 255 / .045),
+    inset 0 0 36px rgb(98 240 255 / .035);
+}
+
+.gsap-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgb(98 240 255 / .045), transparent),
+    linear-gradient(180deg, rgb(98 240 255 / .08), transparent 32%);
+  opacity: .58;
+  transform: translateX(-100%);
+  animation: panelSheen 9s ease-in-out infinite;
+}
+
+.gsap-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(98 240 255 / .08);
+}
+
+.memory-shell aside {
+  margin: .75rem 0 .75rem .75rem;
+  height: calc(100% - 1.5rem);
+  border-radius: 18px;
+  border: 1px solid rgb(98 240 255 / .12);
+  background:
+    linear-gradient(180deg, rgb(7 17 31 / .82), rgb(3 6 11 / .58)),
+    radial-gradient(circle at top, rgb(98 240 255 / .08), transparent 22rem);
+  box-shadow: 0 24px 80px rgb(0 0 0 / .38), inset 0 1px 0 rgb(98 240 255 / .035);
+}
+
+.memory-shell nav a {
+  position: relative;
+  overflow: hidden;
+}
+
+.memory-shell nav a::before {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  top: 8px;
+  width: 2px;
+  border-radius: 999px;
+  background: rgb(98 240 255 / .76);
+  opacity: 0;
+  transform: scaleY(.45);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.memory-shell nav a[aria-current="page"]::before,
+.memory-shell nav a:hover::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.shadow-signal,
+.shadow-node {
+  box-shadow:
+    0 0 var(--memory-glow-px) rgb(98 240 255 / var(--memory-shadow-alpha)),
+    inset 0 0 var(--memory-glow-inset-px) rgb(98 240 255 / var(--memory-shadow-inset-alpha));
+}
+
+.radar-sweep {
+  animation: radar var(--memory-radar-duration) linear infinite;
+  opacity: var(--memory-radar-opacity);
+  box-shadow: 0 0 var(--memory-glow-px) rgb(98 240 255 / var(--memory-radar-shadow-alpha));
+}
+
+.react-flow__edge.animated path {
+  animation-duration: var(--memory-edge-duration) !important;
+}
+
+.react-flow__pane {
+  cursor: grab;
+}
+
+.react-flow__pane:active {
+  cursor: grabbing;
+}
+
+.react-flow__controls,
+.react-flow__minimap {
+  background: rgba(7, 17, 31, .9) !important;
+  border: 1px solid rgb(98 240 255 / var(--memory-flow-border-alpha));
+  box-shadow: 0 0 var(--memory-glow-px) rgb(98 240 255 / var(--memory-flow-shadow-alpha));
+}
+
+.react-flow__controls-button {
+  background: #08111f !important;
+  border-bottom: 1px solid rgba(98, 240, 255, .12) !important;
+  color: #e6f7ff !important;
+}
+
+@keyframes radar {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulsePath {
+  0%, 100% {
+    opacity: .35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes nebulaDrift {
+  from {
+    transform: translate3d(-1.2%, -.8%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.4%, 1%, 0) scale(1.04);
+  }
+}
+
+@keyframes fragmentDrift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 320px 120px, -260px 180px;
+  }
+}
+
+@keyframes panelSheen {
+  0%, 78% {
+    transform: translateX(-105%);
+    opacity: 0;
+  }
+  86% {
+    opacity: .55;
+  }
+  100% {
+    transform: translateX(105%);
+    opacity: 0;
+  }
+}

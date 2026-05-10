@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MemoryKind {
+  MEMORY
+  PROJECT
+  RELATIONSHIP
+  LOCATION
+  IDEA
+  DREAM
+  MUSIC
+  MEDIA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  memories     Memory[]
+  uploads      Upload[]
+  apiKeys      ApiKey[]
+}
+
+model ApiKey {
+  id         String   @id @default(cuid())
+  userId     String?
+  label      String
+  prefix     String
+  keyHash    String   @unique
+  scopes     String[]
+  status     String   @default("active")
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([status])
+}
+
+model Memory {
+  id        String     @id @default(cuid())
+  userId    String
+  title     String
+  kind      MemoryKind @default(MEMORY)
+  summary   String
+  happenedAt DateTime
+  emotion   String
+  intensity Int        @default(50)
+  tags      String[]
+  location  String?
+  weather   String?
+  metadata  Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceLinks MemoryLink[] @relation("source")
+  targetLinks MemoryLink[] @relation("target")
+  uploads   Upload[]
+
+  @@index([userId, kind])
+  @@index([happenedAt])
+}
+
+model MemoryLink {
+  id       String @id @default(cuid())
+  sourceId String
+  targetId String
+  label    String
+  weight   Int    @default(50)
+  source   Memory @relation("source", fields: [sourceId], references: [id], onDelete: Cascade)
+  target   Memory @relation("target", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, label])
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  title     String
+  githubUrl String?
+  markdown  String
+  progress  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Upload {
+  id        String   @id @default(cuid())
+  userId    String
+  memoryId  String?
+  fileName  String
+  mimeType  String
+  size      Int
+  path      String
+  thumbnailPath String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memory    Memory?  @relation(fields: [memoryId], references: [id], onDelete: SetNull)
+}

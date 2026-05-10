@@ -1,0 +1,17 @@
+{
+  "name": "MemoryOS",
+  "short_name": "MemoryOS",
+  "description": "A cinematic spatial memory operating system.",
+  "start_url": "/memory-space",
+  "display": "standalone",
+  "background_color": "#03060b",
+  "theme_color": "#03060b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
