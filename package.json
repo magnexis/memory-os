@@ -1,5 +1,5 @@
 {
-  "name": "memoryos",
+  "name": "@magnexis/memoryos",
   "version": "0.1.1",
   "private": false,
   "description": "A cinematic spatial memory operating system.",
