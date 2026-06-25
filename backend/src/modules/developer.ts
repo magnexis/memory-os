@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { hashApiKey } from "../utils/auth.js";
+import { hashApiKey, requireAuth, userId } from "../utils/auth.js";
 
 const scopes = ["memories:read", "memories:write", "media:write", "search:read", "webhooks:write"] as const;
 
@@ -11,8 +11,10 @@ function newApiKey(environment: "development" | "staging" | "production") {
 }
 
 export async function developerRoutes(app: FastifyInstance) {
-  app.get("/developer/keys", async () => {
-    const keys = await app.prisma.apiKey.findMany({ orderBy: { createdAt: "desc" }, take: 50 });
+  app.addHook("preHandler", requireAuth);
+
+  app.get("/developer/keys", async (request) => {
+    const keys = await app.prisma.apiKey.findMany({ where: { userId: userId(request) }, orderBy: { createdAt: "desc" }, take: 50 });
     return keys.map((key) => ({
       id: key.id,
       label: key.label,
@@ -37,7 +39,8 @@ export async function developerRoutes(app: FastifyInstance) {
         prefix: rawKey.split("_").slice(0, 2).join("_"),
         keyHash: hashApiKey(rawKey),
         scopes: body.scopes,
-        status: "active"
+        status: "active",
+        userId: userId(request)
       }
     });
     reply.code(201);
@@ -55,6 +58,8 @@ export async function developerRoutes(app: FastifyInstance) {
   app.patch("/developer/keys/:id", async (request) => {
     const params = z.object({ id: z.string() }).parse(request.params);
     const body = z.object({ status: z.enum(["active", "restricted", "revoked"]) }).parse(request.body);
+    const existing = await app.prisma.apiKey.findUnique({ where: { id: params.id } });
+    if (!existing || existing.userId !== userId(request)) return { error: "Key not found" };
     return app.prisma.apiKey.update({
       where: { id: params.id },
       data: { status: body.status },
@@ -64,6 +69,8 @@ export async function developerRoutes(app: FastifyInstance) {
 
   app.delete("/developer/keys/:id", async (request) => {
     const params = z.object({ id: z.string() }).parse(request.params);
+    const existing = await app.prisma.apiKey.findUnique({ where: { id: params.id } });
+    if (!existing || existing.userId !== userId(request)) return { error: "Key not found" };
     await app.prisma.apiKey.delete({ where: { id: params.id } });
     return { ok: true };
   });

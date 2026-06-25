@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { hashApiKey } from "../utils/auth.js";
+import { hashApiKey, userId } from "../utils/auth.js";
 
 async function requireApiKey(request: FastifyRequest, reply: FastifyReply) {
   const header = request.headers.authorization;
@@ -31,6 +31,7 @@ export async function memoryOsApiRoutes(app: FastifyInstance) {
     if (!hasScope(request, "memories:read")) return reply.forbidden("Missing memories:read scope");
     const query = z.object({ take: z.coerce.number().min(1).max(100).default(25) }).parse(request.query);
     const records = await app.prisma.memory.findMany({
+      where: { userId: userId(request) },
       orderBy: { happenedAt: "desc" },
       take: query.take,
       select: { id: true, title: true, kind: true, summary: true, happenedAt: true, emotion: true, tags: true, location: true, intensity: true }
@@ -40,10 +41,11 @@ export async function memoryOsApiRoutes(app: FastifyInstance) {
 
   app.get("/v1/graph", async (request, reply) => {
     if (!hasScope(request, "memories:read")) return reply.forbidden("Missing memories:read scope");
+    const uid = userId(request);
     const [memories, links, uploads] = await Promise.all([
-      app.prisma.memory.count(),
-      app.prisma.memoryLink.count(),
-      app.prisma.upload.count()
+      app.prisma.memory.count({ where: { userId: uid } }),
+      app.prisma.memoryLink.count({ where: { source: { userId: uid } } }),
+      app.prisma.upload.count({ where: { userId: uid } })
     ]);
     return { data: { memories, links, uploads } };
   });
@@ -53,6 +55,7 @@ export async function memoryOsApiRoutes(app: FastifyInstance) {
     const query = z.object({ q: z.string().min(1).max(120) }).parse(request.query);
     const records = await app.prisma.memory.findMany({
       where: {
+        userId: userId(request),
         OR: [
           { title: { contains: query.q, mode: "insensitive" } },
           { summary: { contains: query.q, mode: "insensitive" } },
