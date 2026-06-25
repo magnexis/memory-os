@@ -1,7 +1,7 @@
 {
   "name": "memoryos",
   "version": "0.1.1",
-  "private": true,
+  "private": false,
   "description": "A cinematic spatial memory operating system.",
   "workspaces": [
     "frontend",
